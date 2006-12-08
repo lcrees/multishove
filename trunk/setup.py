@@ -24,7 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-'''setup - setuptools based setup for shove.'''
+'''setup - setuptools based setup for multishove.'''
 
 import ez_setup
 ez_setup.use_setuptools()
@@ -34,72 +34,85 @@ try:
 except:
     from distutils.core import setup
 
-setup(name='shove',
+setup(name='multishove',
       version='0.1',
-      description='''Common object storage frontend.''',
-      long_description='''Common object storage frontend that supports
+      description='''Common frontend for multiple object stores.''',
+      long_description='''Common frontend that lazily stores objects
+in multiple objects storage backends simultaneously and supports
 dictionary-style access, object serialization and compression, and
 multiple storage and caching backends.
 
 Currently supported storage backends are:
 
 Amazon S3 Web Service
+
 Berkeley Source Database
+
 Memory
+
 Filesystem
+
 Firebird
+
 FTP
+
 DBM
+
 Durus
+
 Microsoft SQL Server
+
 MySQL
+
 Oracle
+
 PostgreSQL
+
 SQLite
+
 Subversion
+
 Zope Object Database (ZODB)
 
 Currently supported caching backends are:
 
 Memory
+
 Filesystem
+
 Firebird
+
 memcache
+
 Microsoft SQL Server
+
 MySQL
+
 Oracle
+
 PostgreSQL
+
 SQLite
 
-The simplest shove use case is:
+The use of multiple backends for storage involves
+passing multiple store URIs or instances to
+multishove following the form:
 
-from shove import Shove
+<storename> = Shove(<store_uri1>, <store_uri2> ..., cache=<cache_uri>)
 
-store = Shove()
+multishove's access API is the Python mapping API:
 
-which creates an in-memory store and cache.
+http://docs.python.org/lib/typesmapping.html
 
-The use of other backends for storage and caching involves
-passing an module URI or existing store or cache instance
-to shove following the form:
+multishove requires the shove package from:
 
-from shove import Shove
-
-<storename> = Shove(<store_uri>, <cache_uri>)
-
-The module-specific URI form is documented in its module. The
-form follows the URI form used by SQLAlchemy:
-
-http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_establishing
-
-shove's access API is the Python mapping API:
-
-http://docs.python.org/lib/typesmapping.html''',
+http://cheeseshop.python.org/pypi/shove
+''',
       author='L. C. Rees',
       author_email='lcrees@gmail.com',
       license='BSD',
-      packages = ['shove', 'shove.cache', 'shove.store', 'shove.tests'],
-      test_suite='shove.tests',
+      packages = ['multishove', 'multishove.tests'],
+      test_suite='multishove.tests',
       zip_safe = True,
       keywords='object storage persistence database shelve',
       classifiers=['Development Status :: 4 - Beta',
@@ -108,35 +121,4 @@ http://docs.python.org/lib/typesmapping.html''',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
           'Topic :: Database :: Front-Ends'],
-    install_requires = ['SQLAlchemy>=0.3', 'boto'],
-    entry_points = '''
-    [shove.stores]   
-    bsddb=shove.store.bsdb:BsdStore    
-    dbm=shove.store.dbm:DbmStore
-    durus=shove.store.durusdb:DurusStore
-    file=shove.store.file:FileStore
-    firebird=shove.store.db:DbStore
-    ftp=shove.store.ftp:FtpStore   
-    memory=shove.store.memory:MemoryStore
-    mssql=shove.store.db:DbStore
-    mysql=shove.store.db:DbStore
-    oracle=shove.store.db:DbStore
-    postgres=shove.store.db:DbStore
-    simple=shove.store.simple:SimpleStore
-    sqlite=shove.store.db:DbStore
-    s3=shove.store.s3:S3Store
-    svn=shove.store.svn:SvnStore
-    zodb=shove.store.zodb:ZodbStore
-    [shove.caches]
-    bsddb=shove.cache.bsdb:BsdCache    
-    file=shove.cache.file:FileCache
-    firebird=shove.cache.db:DbCache
-    memcache=shove.cache.memcached:MemCached
-    memory=shove.cache.memory:MemoryCache
-    mssql=shove.cache.db:DbCache
-    mysql=shove.cache.db:DbCache
-    oracle=shove.cache.db:DbCache
-    postgres=shove.cache.db:DbCache
-    simple=shove.cache.simple:SimpleCache
-    sqlite=shove.cache.db:DbCache
-    ''')
+    install_requires = ['shove'])
