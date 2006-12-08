@@ -26,7 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''Common frontend for multiple object stores.''' 
+'''Common frontend for storing objects in multiple storage backends at once.''' 
 
 from shove import BaseStore, getbackend, stores, caches 
 
@@ -35,7 +35,7 @@ __all__ = ['MultiShove']
   
 class MultiShove(BaseStore):
 
-    '''Common frontend for multiple object stores.'''
+    '''Common frontend to multiple object stores.'''
     
     def __init__(self, *a, **kw):
         # Init superclass with first store
@@ -82,6 +82,7 @@ class MultiShove(BaseStore):
     def sync(self):
         '''Writes buffer to store.'''
         for k, v in self._buffer.iteritems():
+            # Sync all stores
             for store in self._stores: store[k] = v
         self._buffer.clear()
         
@@ -90,6 +91,7 @@ class MultiShove(BaseStore):
         # If close has been called, pass
         if self._stores is not None:
             self.sync()
+            # Close stores
             for idx, store in enumerate(self._stores):
                 store.close()
                 self._stores[idx] = None

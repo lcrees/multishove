@@ -35,12 +35,10 @@ except:
     from distutils.core import setup
 
 setup(name='multishove',
-      version='0.1',
-      description='''Common frontend for multiple object stores.''',
-      long_description='''Common frontend that lazily stores objects
-in multiple objects storage backends simultaneously and supports
-dictionary-style access, object serialization and compression, and
-multiple storage and caching backends.
+version='0.1',
+description='''Simultaneous storage of objects in multiple storage backends.''',
+long_description='''Stores objects in multiple storage backends simultaneously
+with dictionary-style access, caching, and object serialization and compression.
 
 Currently supported storage backends are:
 
@@ -98,9 +96,11 @@ The use of multiple backends for storage involves
 passing multiple store URIs or instances to
 multishove following the form:
 
-<storename> = Shove(<store_uri1>, <store_uri2> ..., cache=<cache_uri>)
+from multishove import MultiShove
 
-multishove's access API is the Python mapping API:
+<storename> = MultiShove(<store_uri1>, <store_uri2> ..., cache=<cache_uri>)
+
+multishove's access API is the Python dictionary/mapping API:
 
 http://docs.python.org/lib/typesmapping.html
 
