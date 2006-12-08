@@ -39,7 +39,8 @@ class MultiShove(BaseStore):
     
     def __init__(self, *a, **kw):
         # Init superclass with first store
-        super(MultiShove, self).__init__(a[0], **kw)
+        super(MultiShove, self).__init__('', **kw)
+        if not a: a = ('simple://',)
         # Load stores
         self._stores = list(getbackend(i, stores, **kw) for i in a)
         # Load cache
@@ -71,7 +72,7 @@ class MultiShove(BaseStore):
             del self._cache[key]
         except KeyError: pass
         self.sync()
-        for store in self._stores: del self.store[key]
+        for store in self._stores: del store[key]
 
     def keys(self):
         '''Returns a list of keys in shove.'''
@@ -92,4 +93,4 @@ class MultiShove(BaseStore):
             for idx, store in enumerate(self._stores):
                 store.close()
                 self._stores[idx] = None
-            self._cache = self._buffer = None
+            self._cache = self._buffer = self._stores = None
