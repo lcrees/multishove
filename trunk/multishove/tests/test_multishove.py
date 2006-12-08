@@ -4,18 +4,18 @@ from multishove import MultiShove
 
 class TestMultiShove(unittest.TestCase):
 
-    stores = ('simple://', 'memory://', 'file://test', 'sqlite://', 'dbm://test.dbm'
-        'bsddb://test.db')
+    stores = ('simple://', 'dbm://one.dbm', 'memory://', 'file://two', 'sqlite://', 
+        'bsddb://three.db')
 
     def setUp(self): 
-        self.store = MultiShove(*stores)
+        self.store = MultiShove(*self.stores)
 
     def tearDown(self): 
         self.store.close()
-        for x in os.listdir('test'): os.remove(os.path.join('test', x))
-        os.rmdir('test')
-        os.remove('test.dbm')
-        os.remove('test.db')
+        for x in os.listdir('two'): os.remove(os.path.join('two', x))
+        os.rmdir('two')
+        os.remove('one.dbm')
+        os.remove('three.db')
 
     def test__getitem__(self):
         self.store['max'] = 3
@@ -38,7 +38,7 @@ class TestMultiShove(unittest.TestCase):
         self.assertEqual(self.store.get('min'), None)
             
     def test__cmp__(self):
-        tstore = Shove()
+        tstore = MultiShove()
         self.store['max'] = 3
         tstore['max'] = 3
         self.store.sync()
@@ -48,11 +48,8 @@ class TestMultiShove(unittest.TestCase):
     def test__len__(self):
         self.store['max'] = 3
         self.store['min'] = 6
-        self.assertEqual(len(self.store), 2)
-
-    def test_close(self):
-        self.store.close()
-        self.assertEqual(self.store, None)
+        self.store['pow'] = 7
+        self.assertEqual(len(self.store), 3)
 
     def test_clear(self):
         self.store['max'] = 3
@@ -110,7 +107,7 @@ class TestMultiShove(unittest.TestCase):
         self.assertEqual(self.store['pow'], 8)
 
     def test_update(self):
-        tstore = Shove()
+        tstore = MultiShove()
         tstore['max'] = 3
         tstore['min'] = 6
         tstore['pow'] = 7
