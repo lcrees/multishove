@@ -11,9 +11,9 @@
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
 #
-#    3. Neither the name of Django nor the names of its contributors may be used
-#       to endorse or promote products derived from this software without
-#       specific prior written permission.
+#    3. Neither the name of the Portable Site Information project nor the names
+#       of its contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,23 +28,24 @@
 
 '''Common frontend for multiple object stores.''' 
 
-from shove import Shove, getbackend 
+from shove import BaseStore, getbackend, stores, caches 
 
 __all__ = ['MultiShove']
     
   
-class MultiShove(Shove):
+class MultiShove(BaseStore):
 
     '''Common frontend for multiple object stores.'''
     
     def __init__(self, *a, **kw):
-        cache = kw.get('cache', 'simple://')
-        # Init superclass wi
-        super(Shove, self).__init__(a[0], cache, **kw)
-        # Delete single store instance
-        del self._store
+        # Init superclass with first store
+        super(MultiShove, self).__init__(a[0], **kw)
         # Load stores
-        stores = tuple(getbackend(i, stores, **kw) for i in a)
+        self._stores = list(getbackend(i, stores, **kw) for i in a)
+        # Load cache
+        self._cache = getbackend(kw.get('cache', 'simple://'), caches, **kw)
+        # Buffer for lazy writing and setting for syncing frequency
+        self._buffer, self._sync = dict(), kw.get('sync', 2)        
         
     def __getitem__(self, key):
         '''Gets a item from shove.'''
@@ -53,9 +54,16 @@ class MultiShove(Shove):
         except KeyError:
             # Synchronize cache and store
             self.sync()
+            # Get value from first store
             value = self._stores[0][key]
             self._cache[key] = value
             return value
+
+    def __setitem__(self, key, value):
+        '''Sets an item in shove.'''
+        self._cache[key] = self._buffer[key] = value
+        # When the buffer reaches self._limit, writes the buffer to the store
+        if len(self._buffer) >= self._sync: self.sync()        
 
     def __delitem__(self, key):
         '''Deletes an item from multiple stores.'''
@@ -79,9 +87,9 @@ class MultiShove(Shove):
     def close(self):
         '''Finalizes and closes shove stores.'''
         # If close has been called, pass
-        if self._store is not None:
+        if self._stores is not None:
             self.sync()
-            for store in self._stores:
+            for idx, store in enumerate(self._stores):
                 store.close()
-                store = None
-            self._store = self._cache = self._buffer = None
+                self._stores[idx] = None
+            self._cache = self._buffer = None
